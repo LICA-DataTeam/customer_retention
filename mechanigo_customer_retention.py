@@ -1038,9 +1038,8 @@ if __name__ == '__main__':
         with col2:
             # 6-months last txn, 6-months ITT, non new customer
             st.markdown('Returning customer, 6-months last transaction, 6-months ITT')
-            six_month_interval = df_merged[(df_merged.frequency > 0) & (df_merged.last_txn >= 180) 
-                                      & (df_merged.last_txn <= 210) & (df_merged.ITT >= 180) &
-                                      (df_merged.ITT <= 210) & ~(df_merged.full_name.isin(df_merged[df_merged.last_txn < 180]['full_name'].unique().tolist()))].sort_values('full_name')\
+            six_month_interval = df_merged[(df_merged.frequency > 0) & (df_merged.last_txn >= 150) 
+                                      & (df_merged.last_txn <= 180) & ~(df_merged.full_name.isin(df_merged[df_merged.last_txn < 150]['full_name'].unique().tolist()))].sort_values('full_name')\
                                                               .reset_index()\
                                                               .drop(columns='index')
             st.download_button('Download',
