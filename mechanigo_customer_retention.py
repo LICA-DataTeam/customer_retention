@@ -931,7 +931,8 @@ def mechanics_utilization(df):
         df_new.loc[:,'mean_bookings_' + day] = df_new.apply(lambda x: get_mechanics_stats(df_copy, x['mechanic_name'], day), axis=1)
     
     df_new.loc[:, 'mean_weekly_bookings'] = df_new.fillna(0).sum(axis=1,
-                                                       skipna = True)
+                                                       skipna = True,
+                                                       numeric_only = True)
     df_new.loc[:, 'mean_daily_bookings'] = df_new.apply(lambda x: get_mechanics_stats(df_copy, x['mechanic_name']), axis=1)
     return df_new
 
