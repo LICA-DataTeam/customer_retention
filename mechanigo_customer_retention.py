@@ -1,6 +1,7 @@
 # import required modules
 import pandas as pd
 import numpy as np
+import os, sys
 import streamlit as st
 from st_aggrid import GridOptionsBuilder, AgGrid
 
@@ -14,10 +15,14 @@ from plotly.subplots import make_subplots
 from lifetimes.fitters.pareto_nbd_fitter import ParetoNBDFitter
 from lifetimes.plotting import plot_probability_alive_matrix
 from lifetimes import GammaGammaFitter
-# import os
-# from joblib import dump, load
+from joblib import dump, load
 
 pd.options.mode.chained_assignment = None  # default='warn'
+
+## INITIALIZATION
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+output_path = os.path.abspath(os.path.dirname(__file__))
+os.chdir(output_path) # current working directory
 
 def remove_emoji(text):
     emoj = re.compile("["
@@ -721,14 +726,37 @@ def bar_plot(df_retention, option = 'Inter-transaction time (ITT)'):
 
 @st.cache_resource
 def fit_models(df_retention):
-    pnbd = ParetoNBDFitter(penalizer_coef=0.001)
-    pnbd.fit(df_retention['frequency'], df_retention['recency'], df_retention['T'])
-    # model to estimate average monetary value of customer transactions
-    ggf = GammaGammaFitter(penalizer_coef=0.001)
-    # filter df to returning customers
-    returning_df_retention = df_retention[df_retention['frequency']>0]
-    # fit model
-    ggf.fit(returning_df_retention['frequency'], returning_df_retention['avg_sales'])
+    
+    pnbd_filename = 'pnbd.joblib'
+    if os.path.exists(pnbd_filename):
+        pnbd_dtime = datetime.fromtimestamp(os.path.getmtime(pnbd_filename)).date()
+        if (datetime.today() - pnbd_dtime) >= 7:
+            pnbd = ParetoNBDFitter(penalizer_coef=0.001)
+            pnbd.fit(df_retention['frequency'], df_retention['recency'], df_retention['T'])
+        else:
+            pnbd = load(pnbd_filename)
+    else:
+        pnbd = ParetoNBDFitter(penalizer_coef=0.001)
+        pnbd.fit(df_retention['frequency'], df_retention['recency'], df_retention['T'])
+        dump(pnbd, pnbd_filename)
+    
+    ggf_filename = 'ggf.joblib'
+    if os.path.exists(ggf_filename):
+        ggf_dtime = datetime.fromtimestamp(os.path.getmtime(ggf_filename)).date()
+        if (datetime.today() - ggf_dtime) >= 7:
+            # model to estimate average monetary value of customer transactions
+            ggf = GammaGammaFitter(penalizer_coef=0.001)
+            # filter df to returning customers
+            returning_df_retention = df_retention[df_retention['frequency']>0]
+            # fit model
+            ggf.fit(returning_df_retention['frequency'], returning_df_retention['avg_sales'])
+        else:
+            ggf = load(ggf_filename)
+    else:
+        ggf = GammaGammaFitter(penalizer_coef=0.001)
+        returning_df_retention = df_retention[df_retention['frequency']>0]
+        ggf.fit(returning_df_retention['frequency'], returning_df_retention['avg_sales'])
+        dump(ggf, ggf_filename)
     
     return pnbd, ggf
 
@@ -902,7 +930,8 @@ def mechanics_utilization(df):
     for day in day_names:
         df_new.loc[:,'mean_bookings_' + day] = df_new.apply(lambda x: get_mechanics_stats(df_copy, x['mechanic_name'], day), axis=1)
     
-    df_new.loc[:, 'mean_weekly_bookings'] = df_new.sum(axis=1)
+    df_new.loc[:, 'mean_weekly_bookings'] = df_new.sum(axis=1,
+                                                       skipna = True)
     df_new.loc[:, 'mean_daily_bookings'] = df_new.apply(lambda x: get_mechanics_stats(df_copy, x['mechanic_name']), axis=1)
     return df_new
 
