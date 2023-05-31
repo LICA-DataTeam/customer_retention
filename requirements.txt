@@ -5,3 +5,4 @@ streamlit-aggrid
 lifetimes
 matplotlib
 seaborn
+plotly
