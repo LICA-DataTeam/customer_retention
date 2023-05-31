@@ -958,7 +958,8 @@ def service_distribution(df):
     for day in day_names:
         df_new.loc[:,'mean_bookings_' + day] = df_new.apply(lambda x: get_service_stats(df_copy, x['service_category'], day), axis=1)
     
-    df_new.loc[:, 'mean_weekly_bookings'] = df_new.sum(axis=1)
+    df_new.loc[:, 'mean_weekly_bookings'] = df_new.sum(axis=1, skipna = True,
+                                                       numeric_only = True)
     df_new.loc[:, 'mean_daily_bookings'] = df_new.apply(lambda x: get_service_stats(df_copy, x['service_category']), axis=1)
     return df_new
     
