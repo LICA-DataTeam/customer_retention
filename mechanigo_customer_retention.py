@@ -730,7 +730,7 @@ def fit_models(df_retention):
     pnbd_filename = 'pnbd.joblib'
     if os.path.exists(pnbd_filename):
         pnbd_dtime = datetime.fromtimestamp(os.path.getmtime(pnbd_filename)).date()
-        if (datetime.today() - pnbd_dtime) >= 7:
+        if (datetime.today().date() - pnbd_dtime) >= 7:
             pnbd = ParetoNBDFitter(penalizer_coef=0.001)
             pnbd.fit(df_retention['frequency'], df_retention['recency'], df_retention['T'])
         else:
@@ -743,7 +743,7 @@ def fit_models(df_retention):
     ggf_filename = 'ggf.joblib'
     if os.path.exists(ggf_filename):
         ggf_dtime = datetime.fromtimestamp(os.path.getmtime(ggf_filename)).date()
-        if (datetime.today() - ggf_dtime) >= 7:
+        if (datetime.today().date() - ggf_dtime) >= 7:
             # model to estimate average monetary value of customer transactions
             ggf = GammaGammaFitter(penalizer_coef=0.001)
             # filter df to returning customers
