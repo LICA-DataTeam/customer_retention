@@ -519,8 +519,8 @@ def plot_cohort_analysis(df, column_name, value, start_date, rate_or_actual):
     Calculate and plot return rate for chosen cohort
     '''
     # setup date_range of data and chart
-    date_range = pd.date_range(start = pd.datetime(start_date.year, start_date.month, 1), 
-                                 end = pd.datetime(datetime.today().year, 
+    date_range = pd.date_range(start = datetime(start_date.year, start_date.month, 1), 
+                                 end = datetime(datetime.today().year, 
                                                    datetime.today().month, 1)\
                                                  + dt.timedelta(days=30), 
                                  freq='1M')\
