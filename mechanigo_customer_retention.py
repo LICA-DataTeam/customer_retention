@@ -811,7 +811,7 @@ def search_for_name_retention(name, df_retention):
     df_retention.loc[:,'full_name'] = df_retention.apply(lambda x: x['full_name'].lower(), axis=1)
     # search row with name
     names_retention = df_retention[df_retention.apply(lambda x: name.lower() in x['full_name'], axis=1)]
-    df_temp_retention = names_retention[['full_name', 'phone', 'address', 'brand', 'model', 'model_year_group', 'plate_number', 
+    df_temp_retention = names_retention[['full_name', 'phone', 'address', 'brand', 'model', 'model_year', 'plate_number', 
                                          'service_name', 'prior_services', 'last_mechanic_name', 'frequency', 'ITT', 'last_txn', 
                                          'last_txn_date', 'month_diff', 'prob_active', 'avg_sales', 'total_sales']]
     df_temp_retention.loc[:, 'full_name'] = df_temp_retention.loc[:, 'full_name'].str.title()
@@ -827,7 +827,7 @@ def combine_customer_data(df_data, df_retention):
     Combine dataframes for display/filter-ready use
     '''
     df_temp = df_data.reset_index()[['full_name', 'phone', 'email', 'address', 'brand', 'model', 
-                                     'model_year_group', 'plate_number', 'service_name', 
+                                     'model_year', 'plate_number', 'service_name', 
                                      'prior_services','tx_month', 'lead_source']]\
                                     .drop_duplicates(subset=['full_name', 'brand', 'model'], keep='first')
     
@@ -1039,7 +1039,8 @@ if __name__ == '__main__':
             # 6-months last txn, 6-months ITT, non new customer
             st.markdown('Returning customer, 6-months last transaction, 6-months ITT')
             six_month_interval = df_merged[(df_merged.frequency > 0) & (df_merged.last_txn >= 150) 
-                                      & (df_merged.last_txn <= 180) & ~(df_merged.full_name.isin(df_merged[df_merged.last_txn < 150]['full_name'].unique().tolist()))].sort_values('full_name')\
+                                      & (df_merged.last_txn <= 180) & (df_merged.ITT >= 150) &
+                                      (df_merged.ITT <= 180) & ~(df_merged.full_name.isin(df_merged[df_merged.last_txn < 150]['full_name'].unique().tolist()))].sort_values('full_name')\
                                                               .reset_index()\
                                                               .drop(columns='index')
             st.download_button('Download',
@@ -1123,13 +1124,13 @@ if __name__ == '__main__':
         cat_col, val_col, date_col = st.columns(3)
         with cat_col:
             cat = st.selectbox('Category',
-                               options=['first_acq', 'model_year_group', 'brand',
+                               options=['first_acq', 'model_year', 'brand',
                                         'service_category', 'mechanic_name', 'lead_source'],
                                index = 0,
                                help = 'Category to filter.')
         with val_col:
             opts = {'first_acq': ['None'],
-                    'model_year_group': list(sorted(df_data['model_year_group'].unique())),
+                    'model_year': list(sorted(df_data['model_year'].unique())),
                     'brand' : list(sorted(df_data['brand'].unique())),
                     'service_category': list(np.unique(list(service_category_dict.keys()))),
                     'mechanic_name': sorted(df_data[df_data['mechanic_name'] != '']['mechanic_name'].unique()),
