@@ -613,7 +613,7 @@ def cohort_rfm(df):
                                        T = ('date', lambda x: (datetime.today()-x.min()).days + 1),
                                        year=('date', lambda x: x.min().year),
                                        month=('date', lambda x: x.min().month),
-                                       month_diff=('date', lambda x: int((datetime.today() - x.max())/np.timedelta64(1, 'M'))),
+                                       month_diff=('date', lambda x: np.ceil((datetime.today() - x.max())/np.timedelta64(1, 'M'))),
                                        last_mechanic_name=('mechanic_name', 'first'),
                                        last_txn_date = ('date', lambda x: x.max().date().strftime('%Y/%m/%d'))
                                        )
