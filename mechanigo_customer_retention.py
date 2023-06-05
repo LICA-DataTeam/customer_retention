@@ -834,17 +834,9 @@ def combine_customer_data(df_data, df_retention):
     df_temp_ret = df_retention[['last_mechanic_name', 'frequency', 'ITT', 'last_txn', 'last_txn_date', 'first_acq',  
                                 'total_sales', 'avg_sales', 'month_diff',
                                 'prob_active']].reset_index()
-
-    # df_temp_ret = df_temp_ret.rename(columns = {'prob_active': 'prob_active (%)',
-    #                   'month_diff': 'month_diff (months)',
-    #                   'ITT': 'ITT (days)',
-    #                   'last_txn': 'last_txn (days)',
-    #                   'avg_sales': 'avg_sales (PHP)',
-    #                   'total_sales': 'total_sales (PHP)'
-    #                   })
     
-    df_merged = pd.merge(df_temp, df_temp_ret, how='left', left_on=['full_name', 'brand', 'model'], 
-                                                            right_on=['full_name', 'brand', 'model'])
+    df_merged = pd.merge(df_temp, df_temp_ret, how='right', left_on=['full_name', 'brand', 'model'], 
+                                                            right_on=['full_name', 'brand', 'model']).dropna()
     # Capitalize first letter of each name
     df_merged.loc[:, 'full_name'] = df_merged.loc[:, 'full_name'].str.title()
     return df_merged
@@ -983,14 +975,12 @@ if __name__ == '__main__':
     df_data = get_data()
     
     # calculates cohort rfm data
-    df_retention = cohort_rfm(df_data)
+    df_temp = cohort_rfm(df_data)
     
     # fit pareto/nbd and gamma gamma models
-    pnbd, ggf = fit_models(df_retention)
+    pnbd, ggf = fit_models(df_temp)
     
-    time = 30
-    df_retention = update_retention(pnbd, ggf, time, df_retention)
-    
+
     filter_tab, cohort_tab, mechanics_tab, clv_tab = st.tabs(['Customer Filter', 'Cohort Analysis', 'Mechanics', 'CLV'])
     with filter_tab:
         st.markdown("""
@@ -998,6 +988,28 @@ if __name__ == '__main__':
                 Filter the name/email on the dropdown menu as you hover on the column names. 
                 Click on the entry to display data below. 
                 """)
+                
+        # filters
+        with st.expander('Customer Data Filters'):
+            st.subheader('Last Transaction Date')
+            min_txn, max_txn = st.columns(2)
+            with min_txn:
+                min_txn_date = st.date_input('Min Transaction Date:',
+                          min_value = df_data.appointment_date.min(),
+                          max_value = datetime.today(),
+                          value = df_data.appointment_date.min())
+            with max_txn:
+                max_txn_date = st.date_input('Max Transaction Date:',
+                          min_value = df_data.appointment_date.min(),
+                          max_value = datetime.today(),
+                          value = datetime.today())
+            df_temp.loc[:, 'last_txn_date'] = df_temp.last_txn_date.apply(lambda x: datetime.strptime(x, '%Y/%m/%d'))
+            df_retention = df_temp[(df_temp.last_txn_date.dt.date >= min_txn_date) & (df_temp.last_txn_date.dt.date <= max_txn_date)]
+            df_retention.loc[:, 'last_txn_date'] = df_retention.last_txn_date.apply(lambda x: x.strftime('%Y/%m/%d'))
+            
+        time = 30
+        df_retention = update_retention(pnbd, ggf, time, df_retention)
+         
         customer_retention_list = customer_search(df_data, df_retention)
         
         if len(customer_retention_list):
