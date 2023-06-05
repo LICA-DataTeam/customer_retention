@@ -1003,7 +1003,7 @@ if __name__ == '__main__':
                           min_value = df_data.appointment_date.min(),
                           max_value = datetime.today(),
                           value = datetime.today())
-            df_temp.loc[:, 'last_txn_date'] = df_temp.last_txn_date.apply(lambda x: datetime.strptime(x, '%Y/%m/%d')).astype('datetime64[ns]')
+            df_temp.loc[:, 'last_txn_date'] = df_temp.last_txn_date.apply(lambda x: pd.to_datetime(x, errors = 'coerce')).astype('datetime64[ns]')
             df_retention = df_temp[(df_temp.last_txn_date.dt.date >= min_txn_date) & (df_temp.last_txn_date.dt.date <= max_txn_date)]
             df_retention.loc[:, 'last_txn_date'] = df_retention.last_txn_date.apply(lambda x: x.strftime('%Y/%m/%d'))
             df_temp.loc[:, 'last_txn_date'] = df_temp.last_txn_date.apply(lambda x: x.strftime('%Y/%m/%d'))
