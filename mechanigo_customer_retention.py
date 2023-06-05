@@ -966,7 +966,7 @@ def service_distribution(df):
 @st.cache_data
 def convert_csv(df):
     # IMPORTANT: Cache the conversion to prevent recomputation on every rerun.
-    return df.to_csv().encode('utf-8')
+    return df.to_csv(index = False).encode('utf-8')
 
 def last_update_date():
     return datetime.today().strftime('%Y-%m-%d')
