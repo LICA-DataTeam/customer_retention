@@ -1006,6 +1006,8 @@ if __name__ == '__main__':
             df_temp.loc[:, 'last_txn_date'] = df_temp.last_txn_date.apply(lambda x: datetime.strptime(x, '%Y/%m/%d'))
             df_retention = df_temp[(df_temp.last_txn_date.dt.date >= min_txn_date) & (df_temp.last_txn_date.dt.date <= max_txn_date)]
             df_retention.loc[:, 'last_txn_date'] = df_retention.last_txn_date.apply(lambda x: x.strftime('%Y/%m/%d'))
+            df_temp.loc[:, 'last_txn_date'] = df_temp.last_txn_date.apply(lambda x: x.strftime('%Y/%m/%d'))
+            
             
         time = 30
         df_retention = update_retention(pnbd, ggf, time, df_retention)
