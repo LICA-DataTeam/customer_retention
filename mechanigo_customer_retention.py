@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import re, string
 import seaborn as sns
 #import datetime as dt
-from datetime import datetime
+from datetime import datetime, timedelta
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from lifetimes.fitters.pareto_nbd_fitter import ParetoNBDFitter
@@ -527,7 +527,7 @@ def plot_cohort_analysis(df, column_name, value, start_date, rate_or_actual):
     date_range = pd.date_range(start = datetime(start_date.year, start_date.month, 1), 
                                  end = datetime(datetime.today().year, 
                                                    datetime.today().month, 1)\
-                                                 + dt.timedelta(days=30), 
+                                                 + timedelta(days=30), 
                                  freq='1M')\
                                 .strftime('%Y%m').tolist()
     date_range = [int(d) for d in date_range]
@@ -1003,14 +1003,14 @@ if __name__ == '__main__':
                           min_value = df_data.appointment_date.min(),
                           max_value = datetime.today(),
                           value = datetime.today())
+                
             df_temp.loc[:, 'last_txn_date'] = pd.to_datetime(df_temp.last_txn_date)
             df_retention = df_temp[(df_temp.last_txn_date.dt.date >= min_txn_date) & (df_temp.last_txn_date.dt.date <= max_txn_date)]
             df_retention.loc[:, 'last_txn_date'] = df_retention.last_txn_date.apply(lambda x: x.strftime('%Y/%m/%d'))
             df_temp.loc[:, 'last_txn_date'] = df_temp.last_txn_date.apply(lambda x: x.strftime('%Y/%m/%d'))
             
-            
         time = 30
-        df_retention = update_retention(pnbd, ggf, time, df_temp)
+        df_retention = update_retention(pnbd, ggf, time, df_retention)
          
         customer_retention_list = customer_search(df_data, df_retention)
         
