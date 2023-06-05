@@ -1010,7 +1010,7 @@ if __name__ == '__main__':
             
             
         time = 30
-        df_retention = update_retention(pnbd, ggf, time, df_retention)
+        df_retention = update_retention(pnbd, ggf, time, df_temp)
          
         customer_retention_list = customer_search(df_data, df_retention)
         
